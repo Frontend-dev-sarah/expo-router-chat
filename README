@@ -1,0 +1,4 @@
+### start
+
+1. npx create-expo-app xx --template tabs
+2. npm install convex react-native-dialog @react-native-async-storage/async-storage
