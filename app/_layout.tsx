@@ -52,15 +52,20 @@ function RootLayoutNav() {
 
   return (
     <Stack>
-      <Stack.Screen name='index' options={{
-        title: "Home",
-      }} />
-      <Stack.Screen name='chat/index' />
       <Stack.Screen name='(modals)/login'
         options={{
           presentation: 'modal',
-          title: "Login or Signup",
+          title: "Login",
         }} />
+      <Stack.Screen name='(modals)/signup'
+        options={{
+          presentation: 'modal',
+          title: "Sign up",
+        }} />
+      <Stack.Screen name='home/index' options={{
+        title: "Home",
+      }} />
+      <Stack.Screen name='chat/index' />
     </Stack>
 
   );
