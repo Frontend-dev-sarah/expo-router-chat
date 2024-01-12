@@ -1,10 +1,8 @@
-import { auth } from '@/config/firebase';
 import UserProvider, { UserContext } from '@/context/UserContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack, useRouter } from 'expo-router';
-import { onAuthStateChanged } from 'firebase/auth';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 
@@ -49,29 +47,15 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const router = useRouter()
-  const { user, setUser } = useContext(UserContext);
-  const [initializing, setInitializing] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const { currentUser, isLoading } = useContext(UserContext);
+
+
 
   useEffect(() => {
-    if (initializing) setInitializing(false);
-    // onAuthStateChanged returns an unsubscriber
-    const unsubscribeAuth = onAuthStateChanged(
-      auth,
-      async authenticatedUser => {
-        authenticatedUser ? setUser(authenticatedUser) : setUser(null);
-        setIsLoading(false);
-      }
-    );
-    // unsubscribe auth listener on unmount
-    return unsubscribeAuth;
-  }, [user]);
-
-  useEffect(() => {
-    if (user) {
+    if (currentUser) {
       router.push('/home/home')
     }
-  }, [user])
+  }, [currentUser])
 
   if (isLoading) {
     return <ActivityIndicator />;

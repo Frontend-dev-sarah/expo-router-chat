@@ -1,8 +1,10 @@
 import { Alert, Button, Image, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '@/config/firebase';
 import { Link } from 'expo-router';
+import { doc, setDoc } from 'firebase/firestore';
+import { database } from '@/config/firebase';
 
 const loginImg = require('../../assets/images/login-img.jpeg')
 
@@ -10,11 +12,23 @@ const SignupScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const onHandleSignup = () => {
+    const onHandleSignup = async () => {
         if (email !== '' && password !== '') {
-            createUserWithEmailAndPassword(auth, email, password)
+            await createUserWithEmailAndPassword(auth, email, password)
                 .then(() => console.log('Signup success'))
                 .catch((err) => Alert.alert("Signup error", err.message));
+            const user = auth.currentUser!;
+            await updateProfile(user, {
+                displayName: email.split('@')[0],
+            });
+            //create users collection
+            await setDoc(doc(database, 'users', user.uid), {
+                uid: user?.uid,
+                email: user?.email,
+                displayName: user?.email?.split('@')[0],
+            });
+            //create user chats collection
+            await setDoc(doc(database, 'userChats', user.uid), {});
         }
     };
 
