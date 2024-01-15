@@ -34,7 +34,6 @@ const HomeScreen = () => {
         });
 
     };
-
     const addChats = async () => {
         //check if group(chats in firestore) already exists
         const combinedId = currentUser?.uid! > user?.uid ? currentUser?.uid + user?.uid : user?.uid + currentUser?.uid;

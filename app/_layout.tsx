@@ -1,10 +1,9 @@
 import UserProvider, { UserContext } from '@/context/UserContext';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useFonts } from 'expo-font';
-import { SplashScreen, Stack, useRouter } from 'expo-router';
-import { useContext, useEffect } from 'react';
+import { SplashScreen, Stack, useRouter, useRootNavigation } from 'expo-router';
+import { useContext, useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { Entypo } from '@expo/vector-icons';
+import { Entypo, FontAwesome } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -20,6 +19,24 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const { currentUser, isLoading } = useContext(UserContext);
+  const router = useRouter()
+  const rootNavigation = useRootNavigation();
+
+  const [isNavigationReady, setNavigationReady] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = rootNavigation?.addListener('state', (event) => {
+      setNavigationReady(true);
+    });
+    return function cleanup() {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [rootNavigation]);
+
+
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
@@ -36,8 +53,20 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
+  useEffect(() => {
+    if (!isNavigationReady) {
+      return;
+    }
+    if (!currentUser) {
+      router.push('/(modals)/login')
+    }
+  }, [currentUser, isNavigationReady])
+
   if (!loaded) {
     return null;
+  }
+  if (isLoading) {
+    return <ActivityIndicator />;
   }
 
   return <UserProvider>
@@ -47,19 +76,6 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const router = useRouter()
-  const { currentUser, isLoading } = useContext(UserContext);
-
-
-
-  useEffect(() => {
-    if (currentUser) {
-      router.push('/home/home')
-    }
-  }, [currentUser])
-
-  if (isLoading) {
-    return <ActivityIndicator />;
-  }
 
   return (
     <Stack>
@@ -73,19 +89,18 @@ function RootLayoutNav() {
           presentation: 'modal',
           title: "Signup",
         }} />
-      <Stack.Screen name='home/home' options={{
+      <Stack.Screen name='(home)/index' options={{
         title: "Home",
       }} />
       <Stack.Screen name='chat/index'
         options={{
           title: "Chat",
           headerLeft: () => <Entypo.Button
-            onPress={() => router.push('/home/home')}
+            onPress={() => router.push('/(home)/')}
             name="home" color='#f57c00'
             backgroundColor={'#fff'}
           />
         }} />
-
     </Stack>
 
   );
